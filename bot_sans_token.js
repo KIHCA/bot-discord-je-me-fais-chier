@@ -16,64 +16,107 @@ client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
 });
 
+const reactions = new Map();
+
 client.on('messageCreate', message => {
-    // verifie si ca vient de bathbot
-    if (message.author.id === '297073686916366336') {
-        if (message.embeds.length > 0) {
-            // parcours tous les embeds du message
-            message.embeds.forEach(embed => {
-                // recupere les info de l'embed
-                const author = embed.author;
-                // compare l'auteur de l'embed avec l'url que je veux
-                if (embed.author && embed.author.url === 'https://osu.ppy.sh/users/12280995/osu') {
-                    message.react('🎁');
-                }
-            });
-    }
-}});
+    // vérifie le prefix et regarde si c'est moi l'executeur de la commande
+    if (message.author.id === '380395540208418818' && message.content.startsWith('!')) {
+        // separe la commande et les arguments
+        const args = message.content.slice(1).trim().split(/ +/);
+        const command = args.shift().toLowerCase();
 
-// owobot check
-client.on('messageCreate', message2 => {
-    if (message2.author.id === '289066747443675143') {
-        if (message2.content.includes('MwaCestTom')) {
-            message2.react('🎁');
+        // verifie la commande
+        if (command === 'react') {
+            // verifie si la commande est bonne
+            if (args.length !== 2) {
+                return message.reply("Utilisation : `!react <URL> <réaction>`");
+            }
+
+            const url = args[0];
+            const reaction = args[1];
+
+            // ajoute url et reaction
+            reactions.set(url, reaction);
+            message.reply(`Réaction ${reaction} ajoutée pour l'URL ${url}`);
         }
     }
 });
 
-client.on('messageCreate', message3 => {
-    // verifie si ca bien de bathbot
-    if (message3.author.id === '297073686916366336') {
-        if (message3.embeds.length > 0) {
-            // parcours tous les embeds du message
-            message3.embeds.forEach(embed => {
-                // recupere les info de l'embed
-                const author = embed.author;
-                // compare l'auteur de l'embed avec l'url que je veux
-                if (embed.author && embed.author.url === 'https://osu.ppy.sh/users/16420104/osu') {
-                    message3.react('🇪');
-                    message3.react('🇲');
-                    message3.react('🇴');
-                }
-            });
-    }
-}});
 
-// owobot check
+client.on('messageCreate', message => {
+    // Vérifie si le message est un embed et s'il correspond à une URL dans la collection
+    if (message.embeds.length > 0) {
+        message.embeds.forEach(embed => {
+            if (embed.author && reactions.has(embed.author.url)) {
+                const reaction = reactions.get(embed.author.url);
+                message.react(reaction)
+                    .catch(console.error);
+            }
+        });
+    }
+});
+
+client.on('messageCreate', message => {
+    if (message.author.id === '380395540208418818' && message.content.startsWith('!')) {
+        const args = message.content.slice(1).trim().split(/ +/);
+        const command = args.shift().toLowerCase();
+
+        if (command === 'removelink') {
+            if (args.length !== 1) {
+                return message.reply("Utilisation : `!removelink <URL>`");
+            }
+
+            const urlToRemove = args[0];
+
+            // verifie si le lien existe et le supprime si oui
+            if (reactions.has(urlToRemove)) {
+                reactions.delete(urlToRemove);
+                message.reply(`Lien ${urlToRemove} supprimé avec succès.`);
+            } else {
+                message.reply(`Lien ${urlToRemove} non trouvé.`);
+            }
+        } else if (command === 'removereaction') {
+            if (args.length !== 1) {
+                return message.reply("Utilisation : `!removereaction <URL>`");
+            }
+
+            const urlToRemove = args[0];
+
+            // supprime les reac
+            if (reactions.has(urlToRemove)) {
+                reactions.delete(urlToRemove);
+                message.reply(`Réactions pour ${urlToRemove} supprimées avec succès.`);
+            } else {
+                message.reply(`Aucune réaction trouvée pour ${urlToRemove}.`);
+            }
+        }
+    }
+    else if (message.content.startsWith('!')) {
+        return message.reply("ratio");
+    }
+});
+
+
+
+// mimil taguele
 client.on('messageCreate', message4 => {
-    if (message4.author.id === '289066747443675143') {
-        if (message4.content.includes('Mimil')) {
-            message4.react('🇪');
-            message4.react('🇲');
-            message4.react('🇴');
+    if (message4.author.id === '597519943805960202') {
+        const channel = message4.channel;
+        if (    
+        message4.content.includes('compétences') || 
+        message4.content.includes('compétence') ||
+        message4.content.includes('competences') || 
+        message4.content.includes('competence')) {;
+        channel.send('ta guele emo de merde');
         }
     }
 });
+
 
 client.login(TOKEN);
 
 
- /*         Récupère les différentes informations de l'embed
+ /*          Récupère les différentes informations de l'embed
             const title = embed.title;
             const description = embed.description;
             const url = embed.url;
